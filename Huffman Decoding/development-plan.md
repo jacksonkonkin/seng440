@@ -24,7 +24,7 @@ This project aims to implement a high-performance Huffman decoder optimized for 
   - Configure Xcode project integration
 
 - **Project Structure**
-  - Create modular C++ codebase with clear separation of concerns
+  - Create modular C codebase with clear separation of concerns
   - Organize headers: `core/`, `optimization/`, `testing/`, `benchmarks/`
   - Set up source directories: `src/core/`, `src/arm64/`, `src/simd/`
   - Configure include paths and library linkage
@@ -74,7 +74,7 @@ This project aims to implement a high-performance Huffman decoder optimized for 
 
 #### Tasks:
 - **Reference Decoder**
-  - Implement standard C++ Huffman decoder
+  - Implement standard c Huffman decoder
   - Create bit-by-bit tree traversal algorithm
   - Add input validation and error handling
   - Ensure correctness with known test vectors
@@ -86,7 +86,7 @@ This project aims to implement a high-performance Huffman decoder optimized for 
   - Handle large file processing efficiently
 
 - **Basic Bit Manipulation**
-  - Implement standard bit operations in C++
+  - Implement standard bit operations in c
   - Create bit counting and manipulation routines
   - Add bit reversal and shifting operations
   - Prepare foundation for ARM64 replacements
