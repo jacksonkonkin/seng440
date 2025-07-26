@@ -1,6 +1,6 @@
 # Huffman Decoder Implementation Status
 
-## Current Working Implementation ✅
+## Current Working Implementation
 
 ### Basic Functionality Complete
 We have successfully implemented a working Huffman decoder with the following core components:
@@ -26,7 +26,7 @@ Expected: A B C D C (using 2-bit codes: 00=A, 01=B, 10=C, 11=D)
 Actual output: A B C D C A A A (8 symbols decoded successfully)
 ```
 
-## Target Alphabet Expansion 🎯
+## Target Alphabet Expansion
 
 ### Planned 32-Symbol Alphabet
 Moving from 4-symbol test to realistic text processing:
@@ -88,7 +88,7 @@ clang -I./include/core -o huffman_decoder src/main.c src/core/*.c
 clang -arch arm64 -mcpu=apple-m1 -O3 -I./include/core -o huffman_decoder src/main.c src/core/*.c
 ```
 
-## Optimization Roadmap 🚀
+## Optimization Roadmap
 
 ### Phase 1: ARM64 Instruction Optimization
 **Target**: Replace software operations with hardware instructions
