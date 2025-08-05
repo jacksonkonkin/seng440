@@ -40,75 +40,37 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=undefined")
 
 # Include directories
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include/core
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/optimization
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/arm64
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/simd
 )
 
-# Source files
+# Core source files
 set(CORE_SOURCES
     src/core/huffman_tree.c
     src/core/bit_stream.c
     src/core/decoder.c
+    src/core/encoder.c
+    src/core/file_format.c
+    src/core/huffman_compress.c
+    src/core/benchmark.c
+    src/core/regression_test.c
 )
 
 # Main library
-add_library(huffman_decoder_m4 STATIC
-    ${CORE_SOURCES}
-)
+add_library(huffman_m4 STATIC ${CORE_SOURCES})
 
-# Main executable
-add_executable(huffman_decoder
-    src/main.c
-)
+# Executables
+add_executable(huffman src/huffman_cli.c)
+add_executable(huffman_benchmark src/benchmark_runner.c)
+add_executable(regression_test src/regression_runner.c)
+add_executable(generate_fixed_tests src/generate_fixed_tests.c)
 
-target_link_libraries(huffman_decoder huffman_decoder_m4)
-
-# Testing
-enable_testing()
-
-# Find or build test framework (using simple custom tests for now)
-set(TEST_SOURCES
-    tests/test_huffman_tree.cpp
-    tests/test_bit_stream.cpp
-    tests/test_lookup_table.cpp
-    tests/test_decoder.cpp
-    tests/test_arm64_ops.cpp
-    tests/test_simd_ops.cpp
-    tests/test_runner.cpp
-)
-
-add_executable(run_tests ${TEST_SOURCES})
-target_link_libraries(run_tests huffman_decoder_m4)
-
-# Benchmarks
-set(BENCHMARK_SOURCES
-    benchmarks/benchmark_decoder.cpp
-    benchmarks/benchmark_arm64.cpp
-    benchmarks/benchmark_simd.cpp
-    benchmarks/benchmark_runner.cpp
-)
-
-add_executable(run_benchmarks ${BENCHMARK_SOURCES})
-target_link_libraries(run_benchmarks huffman_decoder_m4)
-
-# Custom targets for common tasks
-add_custom_target(test_all
-    COMMAND run_tests
-    DEPENDS run_tests
-    COMMENT "Running all tests"
-)
-
-add_custom_target(benchmark_all
-    COMMAND run_benchmarks
-    DEPENDS run_benchmarks
-    COMMENT "Running all benchmarks"
-)
+# Link libraries
+target_link_libraries(huffman huffman_m4)
+target_link_libraries(huffman_benchmark huffman_m4)
+target_link_libraries(regression_test huffman_m4)
 
 # Install targets
-install(TARGETS huffman_decoder huffman_decoder_m4
+install(TARGETS huffman huffman_benchmark regression_test huffman_m4
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
@@ -116,7 +78,7 @@ install(TARGETS huffman_decoder huffman_decoder_m4
 
 install(DIRECTORY include/
     DESTINATION include
-    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+    FILES_MATCHING PATTERN "*.h"
 )
 
 # Generate compile_commands.json for IDE support
@@ -124,12 +86,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Print configuration summary
 message(STATUS "")
-message(STATUS "Configuration Summary:")
-message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "  C Standard: ${CMAKE_C_STANDARD}")
-message(STATUS "  System: ${CMAKE_SYSTEM_NAME}")
-message(STATUS "  Processor: ${CMAKE_SYSTEM_PROCESSOR}")
-message(STATUS "  C Flags: ${CMAKE_C_FLAGS}")
-message(STATUS "  C Flags (Release): ${CMAKE_C_FLAGS_RELEASE}")
-message(STATUS "  C Flags (Debug): ${CMAKE_C_FLAGS_DEBUG}")
+message(STATUS "M4-Optimized Huffman Compression")
+message(STATUS "=================================")
+message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "C Standard: ${CMAKE_C_STANDARD}")
+message(STATUS "System: ${CMAKE_SYSTEM_NAME}")
+message(STATUS "Processor: ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "")

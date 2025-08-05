@@ -21,5 +21,6 @@ huffman_tree_t* huffman_tree_create();
 void huffman_tree_destroy(huffman_tree_t* tree);
 huffman_node_t* huffman_node_create(uint8_t symbol, bool is_leaf);
 huffman_tree_t* huffman_tree_from_codes(uint8_t* symbols, uint8_t* code_lengths, size_t count);
+huffman_tree_t* huffman_tree_from_code_table(uint8_t* symbols, uint32_t* codes, uint8_t* code_lengths, size_t count);
 
 #endif
