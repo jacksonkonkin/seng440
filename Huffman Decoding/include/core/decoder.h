@@ -9,6 +9,22 @@
 // ITERATION 3: NEON SIMD vectorized lookup tables
 #ifdef __aarch64__
 #include <arm_neon.h>
+
+// ARM64 inline assembly helpers for bit manipulation
+static inline uint64_t arm64_rbit64(uint64_t x) {
+    uint64_t result;
+    __asm__("rbit %0, %1" : "=r"(result) : "r"(x));
+    return result;
+}
+#else
+// Fallback for non-ARM64 platforms
+static inline uint64_t arm64_rbit64(uint64_t x) {
+    uint64_t result = x;
+    result = ((result & 0xF0F0F0F0F0F0F0F0ULL) >> 4) | ((result & 0x0F0F0F0F0F0F0F0FULL) << 4);
+    result = ((result & 0xCCCCCCCCCCCCCCCCULL) >> 2) | ((result & 0x3333333333333333ULL) << 2);
+    result = ((result & 0xAAAAAAAAAAAAAAAAULL) >> 1) | ((result & 0x5555555555555555ULL) << 1);
+    return result;
+}
 #endif
 
 // Cache-optimized lookup table entry (64-byte aligned)

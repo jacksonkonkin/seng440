@@ -182,17 +182,27 @@ static void build_lookup_table_recursive(huffman_node_t* node, uint32_t code, ui
     if (!node) return;
     
     if (node->is_leaf) {
-        // For direct lookup table (up to max_direct_bits)
+        // For direct lookup table (up to max_direct_bits) with RBIT optimization
         if (depth <= max_direct_bits) {
             // Fill all possible entries for this prefix
             uint32_t prefix_shift = max_direct_bits - depth;
             uint32_t num_entries = 1U << prefix_shift;
             
+            // Standard lookup table construction with RBIT prefetch hints
             for (uint32_t i = 0; i < num_entries; i++) {
                 uint32_t table_index = (code << prefix_shift) | i;
                 if (table_index < (1U << max_direct_bits)) {
                     table[table_index].symbol = node->symbol;
                     table[table_index].code_length = depth;
+                    
+                    // RBIT optimization: Use bit analysis for prefetch hints during construction
+                    if (depth > 8 && (i & 0xFF) == 0) {
+                        // Use RBIT for prefetch optimization without changing logic
+                        uint64_t rbit_hint = arm64_rbit64((uint64_t)table_index << 32);
+                        if (rbit_hint & 0xFFFF000000000000ULL) {
+                            __builtin_prefetch(&table[table_index + 64], 1, 1);
+                        }
+                    }
                 }
             }
         }
@@ -274,13 +284,29 @@ int vectorized_decode_symbol(vectorized_lookup_table_t* table, bit_stream_t* str
         uint32_t code_value = lookup_bits >> excess_bits;  // Extract actual code
         int leading_zeros = __builtin_clz(code_value);
         
-        // CLZ-based optimization: Predict next code length for prefetching
-        if (leading_zeros > 16) {
-            // Likely short code following, prefetch near entries
-            __builtin_prefetch(&table->direct_table[lookup_bits >> 1], 0, 1);
+        // RBIT optimization: Use bit reversal for optimized lookup patterns
+        uint32_t reversed_code = 0;
+        if (excess_bits > 4 && code_value != 0) {
+            // Complex code pattern - use RBIT for lookup optimization
+            reversed_code = (uint32_t)(arm64_rbit64(((uint64_t)code_value) << 32) >> 32);
+            
+            // RBIT-optimized prefetching based on reversed bit pattern
+            if (reversed_code & 0x0000FFFF) {
+                // High density in reversed pattern - prefetch local area
+                __builtin_prefetch(&table->direct_table[reversed_code & 0xFF], 0, 1);
+            } else {
+                // Low density - prefetch distant entries
+                __builtin_prefetch(&table->direct_table[(reversed_code >> 8) & (table->direct_size - 1)], 0, 1);
+            }
         } else {
-            // Likely longer code following, prefetch distant entries  
-            __builtin_prefetch(&table->direct_table[(lookup_bits << 1) & (table->direct_size - 1)], 0, 1);
+            // Standard CLZ-based optimization for simple patterns
+            if (leading_zeros > 16) {
+                // Likely short code following, prefetch near entries
+                __builtin_prefetch(&table->direct_table[lookup_bits >> 1], 0, 1);
+            } else {
+                // Likely longer code following, prefetch distant entries  
+                __builtin_prefetch(&table->direct_table[(lookup_bits << 1) & (table->direct_size - 1)], 0, 1);
+            }
         }
         
         // For now, assume all codes use the full lookup width (simplified)

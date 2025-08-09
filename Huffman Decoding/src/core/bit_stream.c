@@ -135,8 +135,21 @@ static void bit_stream_fill_buffer(bit_stream_t* stream) {
             // Load 8 bytes directly into buffer when possible
             uint64_t chunk = 0;
             memcpy(&chunk, &stream->data[stream->byte_pos], 8);
-            // Use ARM64 hardware byte swap with barrel shifter optimization
-            stream->bit_buffer = __builtin_bswap64(chunk);
+            
+            // Use ARM64 hardware byte swap with RBIT analysis for optimization hints
+            uint64_t byte_swapped = __builtin_bswap64(chunk);
+            
+            // RBIT analysis: Use bit reversal for prefetch optimization without changing data
+            if ((byte_swapped & 0xFF000000FF000000ULL) == 0) {
+                // Sparse pattern detected - use RBIT for prefetch hint calculation only
+                uint64_t rbit_pattern = arm64_rbit64(byte_swapped);
+                // Use RBIT result for prefetch optimization, but keep original data
+                if (rbit_pattern & 0xFFFF) {
+                    __builtin_prefetch(&stream->data[stream->byte_pos + 16], 0, 1);
+                }
+            }
+            
+            stream->bit_buffer = byte_swapped;
             stream->bits_in_buffer = 64;
             stream->byte_pos += 8;
         } else if (bytes_to_read >= 4 && stream->bits_in_buffer <= 32) {
