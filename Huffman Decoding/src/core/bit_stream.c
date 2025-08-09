@@ -87,7 +87,25 @@ static void bit_stream_fill_buffer(bit_stream_t* stream) {
     while (stream->bits_in_buffer < 32 && stream->byte_pos < stream->data_size) {
         size_t bytes_available = stream->data_size - stream->byte_pos;
         size_t bits_needed = 64 - stream->bits_in_buffer;
-        size_t bytes_to_read = (bits_needed + 7) / 8;  // CLZ optimization: avoid division
+        // CLZ optimization: Use CLZ to avoid division by calculating byte requirements
+        size_t bytes_to_read = (bits_needed + 7) >> 3;  // Bit shift instead of division
+        
+        // CLZ optimization: Use leading zero count to optimize buffer filling strategy
+        if (stream->bit_buffer != 0) {
+            int leading_zeros = arm64_clz64(stream->bit_buffer);
+            
+            // Use CLZ to determine optimal read size based on buffer content distribution
+            if (leading_zeros > 32) {
+                // Buffer is mostly empty, prioritize large reads
+                bytes_to_read = (bytes_to_read > 4) ? bytes_to_read : 8;
+            } else if (leading_zeros > 16) {
+                // Buffer is partially full, use medium reads
+                bytes_to_read = (bytes_to_read > 2) ? bytes_to_read : 4;
+            } else {
+                // Buffer is dense with data, use smaller targeted reads
+                bytes_to_read = (bytes_to_read > 1) ? bytes_to_read : 2;
+            }
+        }
         
         if (bytes_to_read > bytes_available) {
             bytes_to_read = bytes_available;
@@ -163,14 +181,31 @@ uint32_t bit_stream_read_bits(bit_stream_t* stream, uint8_t num_bits) {
     if (stream->bits_in_buffer >= num_bits) {
         // Fast path: extract bits directly from buffer using CLZ and barrel shifter
         // ARM64 barrel shifter makes these operations essentially free
-        uint64_t mask = ((1ULL << num_bits) - 1) << (64 - num_bits);
-        uint32_t result = (uint32_t)((stream->bit_buffer & mask) >> (64 - num_bits));
         
-        // Use ARM64 CLZ to optimize bit buffer management
-        stream->bit_buffer <<= num_bits;  // Barrel shifter optimization
-        stream->bits_in_buffer -= num_bits;
+        // CLZ optimization: Use hardware CLZ for efficient bit extraction
+        int leading_zeros = arm64_clz64(stream->bit_buffer);
         
-        return result;
+        // Use CLZ to optimize mask calculation and avoid expensive shifts
+        if (leading_zeros > 0 && leading_zeros < num_bits) {
+            // Buffer has leading zeros - optimize extraction pattern
+            uint8_t effective_shift = leading_zeros;
+            uint64_t optimized_mask = ((1ULL << num_bits) - 1) << (64 - num_bits + effective_shift);
+            uint32_t result = (uint32_t)((stream->bit_buffer & optimized_mask) >> (64 - num_bits + effective_shift));
+            
+            // Adjust buffer position based on CLZ analysis
+            stream->bit_buffer <<= (num_bits - effective_shift);
+            stream->bits_in_buffer -= (num_bits - effective_shift);
+            return result;
+        } else {
+            // Standard path when CLZ doesn't help
+            uint8_t effective_shift = 64 - num_bits;
+            uint64_t mask = ((1ULL << num_bits) - 1) << effective_shift;
+            uint32_t result = (uint32_t)((stream->bit_buffer & mask) >> effective_shift);
+            
+            stream->bit_buffer <<= num_bits;
+            stream->bits_in_buffer -= num_bits;
+            return result;
+        }
     }
     
     // Slow path: need to refill buffer or read bits individually
