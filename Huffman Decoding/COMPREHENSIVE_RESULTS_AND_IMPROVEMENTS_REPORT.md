@@ -21,10 +21,10 @@ This report provides a comprehensive analysis of ARM64-specific optimizations ap
 
 | Iteration | Version | Score | vs Baseline | Key Technologies | Status |
 |-----------|---------|-------|-------------|------------------|---------|
-| **Iteration 1** | Baseline | 124.6 | - | Standard C, `-O3` | ✅ Reference |
-| **Iteration 2A** | ARM64 CLZ | 140.2 | +12.5% | CLZ, CSEL, byte swap | ✅ Documented |
-| **Iteration 2B** | CLZ+RBIT Enhanced | 114.0 | -8.5% | CLZ+RBIT+prefetch | ✅ Current |
-| **Iteration 3** | NEON SIMD | 124.6 | -10.5% | Vectorized lookups | ✅ Advanced |
+| **Iteration 1** | Baseline | 124.6 | - | Standard C, `-O3` | Reference |
+| **Iteration 2A** | ARM64 CLZ | 140.2 | +12.5% | CLZ, CSEL, byte swap | Documented |
+| **Iteration 2B** | CLZ+RBIT Enhanced | 114.0 | -8.5% | CLZ+RBIT+prefetch | Current |
+| **Iteration 3** | NEON SIMD | 124.6 | -10.5% | Vectorized lookups | Advanced |
 
 ### Performance Analysis Summary
 
@@ -626,7 +626,7 @@ vtbl.8  d0, {d2, d3}, d4  ; ← NEON: Vector table lookup
 
 ### Successfully Deployed ARM64 Features
 
-#### 1. CLZ (Count Leading Zeros) Instructions ✅
+#### 1. CLZ (Count Leading Zeros) Instructions
 **Implementation**:
 ```c
 int leading_zeros = arm64_clz64(stream->bit_buffer);
@@ -645,7 +645,7 @@ clz    x10, x9    # ARM64 hardware count leading zeros
 - Dynamic mask generation optimization
 - Efficient bit position calculations
 
-#### 2. RBIT (Reverse Bits) Instructions ✅
+#### 2. RBIT (Reverse Bits) Instructions
 **Implementation**:
 ```c
 uint64_t rbit_pattern = arm64_rbit64(byte_swapped);
@@ -664,7 +664,7 @@ rbit   x11, x10   # ARM64 hardware bit reversal
 - Cache optimization hints
 - Lookup table distribution analysis
 
-#### 3. Hardware Byte Swapping ✅
+#### 3. Hardware Byte Swapping
 **Implementation**:
 ```c
 stream->bit_buffer = __builtin_bswap64(chunk);
@@ -683,7 +683,7 @@ rev    x9, x9     # ARM64 hardware byte swap
 - 8-byte bulk buffer operations
 - Memory layout optimization
 
-#### 4. Conditional Select (CSEL) Patterns ✅
+#### 4. Conditional Select (CSEL) Patterns
 **Implementation**:
 ```c
 current = bit ? next_right : next_left;
@@ -702,7 +702,7 @@ csel   x13, x8, x11, hi   # ARM64 conditional select
 - Branchless decision making
 - Pipeline efficiency improvements
 
-#### 5. NEON SIMD Vectorization ✅ (Advanced)
+#### 5. NEON SIMD Vectorization (Advanced)
 **Implementation**:
 ```c
 uint8x16_t raw_data = vld1q_u8(data);
@@ -938,7 +938,7 @@ StandardText8K Decompression Performance:
 // - Hit rate: ~60%, Memory: Low, Setup: Fast
 // - Result: Frequent tree fallback negates benefits
 
-// Option B: 12-bit lookup (4096 entries, 16KB) ✅ CHOSEN  
+// Option B: 12-bit lookup (4096 entries, 16KB) CHOSEN  
 // - Hit rate: ~95%, Memory: Moderate, Setup: Good
 // - Result: Optimal balance of performance vs memory
 

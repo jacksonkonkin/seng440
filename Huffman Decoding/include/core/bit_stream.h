@@ -20,10 +20,18 @@ void bit_stream_destroy(bit_stream_t* stream);
 bool bit_stream_read_bit(bit_stream_t* stream);
 uint32_t bit_stream_read_bits(bit_stream_t* stream, uint8_t num_bits);
 bool bit_stream_has_data(bit_stream_t* stream);
+void bit_stream_fill_buffer(bit_stream_t* stream);
+
+// ITERATION 4: Lookup table support functions
+uint32_t bit_stream_peek_bits(bit_stream_t* stream, uint8_t num_bits);
+void bit_stream_skip_bits(bit_stream_t* stream, uint8_t num_bits);
+int bit_stream_available_bits(bit_stream_t* stream);
 
 // ITERATION 3: NEON SIMD batch processing functions
 #ifdef __aarch64__
 int bit_stream_read_bits_batch(bit_stream_t* stream, uint8_t* bit_counts, uint32_t* results, int batch_size);
+void bit_stream_peek_batch_neon(bit_stream_t* stream, uint8_t* bit_counts, uint32_t* results, int batch_size);
+void bit_stream_fill_buffer_neon(bit_stream_t* stream);
 #endif
 
 #endif

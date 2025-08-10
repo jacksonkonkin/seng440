@@ -12,12 +12,12 @@ We have successfully implemented a working Huffman decoder with the following co
 - **`main.c`** - Test program demonstrating basic functionality
 
 #### Key Features Working
-- ✅ Tree building from symbol codes and code lengths
-- ✅ Bit-by-bit stream reading with internal buffering
-- ✅ Tree traversal decoding algorithm
-- ✅ Dynamic output buffer management
-- ✅ Proper memory allocation and cleanup
-- ✅ Basic compilation with ARM64 target support
+- Tree building from symbol codes and code lengths
+- Bit-by-bit stream reading with internal buffering
+- Tree traversal decoding algorithm
+- Dynamic output buffer management
+- Proper memory allocation and cleanup
+- Basic compilation with ARM64 target support
 
 #### Current Test Results
 ```

@@ -12,12 +12,12 @@ This document provides a detailed before/after comparison of the most critical f
 
 ## 1. Buffer Fill Function Transformation
 
-### 📊 **Performance Impact**: +20-30% throughput improvement
+### **Performance Impact**: +20-30% throughput improvement
 
 <table>
 <tr>
-<th width="50%">🔵 Iteration 1: Baseline</th>
-<th width="50%">🚀 Iteration 2: ARM64 Optimized</th>
+<th width="50%">Iteration 1: Baseline</th>
+<th width="50%">Iteration 2: ARM64 Optimized</th>
 </tr>
 <tr>
 <td>
@@ -40,10 +40,10 @@ static void bit_stream_fill_buffer(bit_stream_t* stream) {
 ```
 
 **Characteristics:**
-- ❌ Single byte processing (8 bits/iteration)
-- ❌ 8x more memory accesses than optimal
-- ❌ No hardware instruction utilization
-- ✅ Simple, portable code
+- Single byte processing (8 bits/iteration)
+- 8x more memory accesses than optimal
+- No hardware instruction utilization
+- Simple, portable code
 
 </td>
 <td>
@@ -86,16 +86,16 @@ static void bit_stream_fill_buffer(bit_stream_t* stream) {
 ```
 
 **Optimizations Applied:**
-- ✅ 8-byte bulk processing (64 bits/iteration)
-- ✅ Hardware byte swapping (`__builtin_bswap64`)
-- ✅ Adaptive processing (8/4/1 byte strategies)
-- ✅ ARM64 barrel shifter utilization
+- 8-byte bulk processing (64 bits/iteration)
+- Hardware byte swapping (`__builtin_bswap64`)
+- Adaptive processing (8/4/1 byte strategies)
+- ARM64 barrel shifter utilization
 
 </td>
 </tr>
 </table>
 
-### 📈 **Transformation Analysis**
+### **Transformation Analysis**
 - **Memory Efficiency**: 8x reduction in memory accesses for large buffers
 - **Hardware Utilization**: ARM64 REV instruction for byte swapping
 - **Algorithmic Complexity**: Adaptive strategy based on available data
@@ -105,12 +105,12 @@ static void bit_stream_fill_buffer(bit_stream_t* stream) {
 
 ## 2. Bit Extraction Function Evolution
 
-### 📊 **Performance Impact**: Eliminates O(n) loop overhead for multi-bit reads
+### **Performance Impact**: Eliminates O(n) loop overhead for multi-bit reads
 
 <table>
 <tr>
-<th width="50%">🔵 Iteration 1: Loop-Based</th>
-<th width="50%">🚀 Iteration 2: CLZ Optimized</th>
+<th width="50%">Iteration 1: Loop-Based</th>
+<th width="50%">Iteration 2: CLZ Optimized</th>
 </tr>
 <tr>
 <td>
@@ -135,10 +135,10 @@ uint32_t bit_stream_read_bits(bit_stream_t* stream,
 ```
 
 **Limitations:**
-- ❌ O(n) complexity where n = bit count
-- ❌ Function call overhead per bit
-- ❌ Loop and branch overhead
-- ❌ No bulk processing capability
+- O(n) complexity where n = bit count
+- Function call overhead per bit
+- Loop and branch overhead
+- No bulk processing capability
 
 </td>
 <td>
@@ -171,17 +171,12 @@ uint32_t bit_stream_read_bits(bit_stream_t* stream,
 }
 ```
 
-**Optimizations Applied:**
-- ✅ O(1) fast path for common cases
-- ✅ Direct bit field extraction
-- ✅ ARM64 barrel shifter utilization  
-- ✅ Maintains compatibility fallback
 
 </td>
 </tr>
 </table>
 
-### 📈 **Transformation Analysis**
+### **Transformation Analysis**
 - **Algorithmic Improvement**: O(n) → O(1) for buffered reads
 - **Hardware Utilization**: Bit masking with barrel shifter
 - **Performance Pattern**: Fast path for 90%+ of operations
@@ -191,12 +186,12 @@ uint32_t bit_stream_read_bits(bit_stream_t* stream,
 
 ## 3. Tree Traversal Algorithm Optimization  
 
-### 📊 **Performance Impact**: +26-30% decompression speed via branch optimization
+### **Performance Impact**: +26-30% decompression speed via branch optimization
 
 <table>
 <tr>
-<th width="50%">🔵 Iteration 1: Traditional Branching</th>
-<th width="50%">🚀 Iteration 2: CSEL Pattern</th>
+<th width="50%">Iteration 1: Traditional Branching</th>
+<th width="50%">Iteration 2: CSEL Pattern</th>
 </tr>
 <tr>
 <td>
@@ -233,11 +228,6 @@ int huffman_decode_symbol(huffman_tree_t* tree,
 }
 ```
 
-**Branch Prediction Issues:**
-- ❌ Unpredictable if-else patterns
-- ❌ 15-25 cycle misprediction penalty
-- ❌ Variable tree navigation patterns
-- ❌ Pipeline stalls on random data
 
 </td>
 <td>
@@ -276,16 +266,16 @@ int huffman_decode_symbol(huffman_tree_t* tree,
 ```
 
 **ARM64 Optimizations:**
-- ✅ CSEL instruction generation
-- ✅ Preloaded memory access
-- ✅ Branch prediction hints  
-- ✅ Single-cycle conditional move
+- CSEL instruction generation
+- Preloaded memory access
+- Branch prediction hints  
+- Single-cycle conditional move
 
 </td>
 </tr>
 </table>
 
-### 📈 **Transformation Analysis**
+### **Transformation Analysis**
 - **Instruction Efficiency**: 2 instructions vs 3-4 for traditional branch
 - **Pipeline Impact**: No branch misprediction stalls
 - **Memory Access**: Parallel loading of both tree nodes
@@ -295,12 +285,12 @@ int huffman_decode_symbol(huffman_tree_t* tree,
 
 ## 4. Main Decode Loop Enhancement
 
-### 📊 **Performance Impact**: +10-15% via cache optimization and proactive management
+### **Performance Impact**: +10-15% via cache optimization and proactive management
 
 <table>
 <tr>
-<th width="50%">🔵 Iteration 1: Reactive Management</th>
-<th width="50%">🚀 Iteration 2: Proactive + Cache Hints</th>
+<th width="50%">Iteration 1: Reactive Management</th>
+<th width="50%">Iteration 2: Proactive + Cache Hints</th>
 </tr>
 <tr>
 <td>
@@ -341,10 +331,10 @@ int huffman_decode(huffman_decoder_t* decoder,
 ```
 
 **Performance Issues:**
-- ❌ Reactive buffer resize (causes stalls)  
-- ❌ No cache preparation
-- ❌ No branch prediction hints
-- ❌ Memory allocation stalls
+- Reactive buffer resize (causes stalls)  
+- No cache preparation
+- No branch prediction hints
+- Memory allocation stalls
 
 </td>
 <td>
@@ -392,16 +382,16 @@ int huffman_decode(huffman_decoder_t* decoder,
 ```
 
 **ARM64 Enhancements:**
-- ✅ Proactive buffer management (8-symbol lookahead)
-- ✅ Cache prefetch hints (64-byte aligned)
-- ✅ Branch prediction optimization
-- ✅ Success path prioritization
+- Proactive buffer management (8-symbol lookahead)
+- Cache prefetch hints (64-byte aligned)
+- Branch prediction optimization
+- Success path prioritization
 
 </td>
 </tr>
 </table>
 
-### 📈 **Transformation Analysis**
+### **Transformation Analysis**
 - **Stall Prevention**: Proactive buffer resize eliminates allocation stalls
 - **Cache Optimization**: 64-byte prefetch matches ARM64 cache line size
 - **Branch Hints**: Success path optimization improves prediction accuracy
@@ -411,7 +401,7 @@ int huffman_decode(huffman_decoder_t* decoder,
 
 ## Summary: Code Evolution Impact
 
-### 🎯 **Quantitative Improvements**
+### **Quantitative Improvements**
 
 | Metric | Iteration 1 | Iteration 2 | Improvement |
 |--------|-------------|-------------|-------------|
@@ -443,7 +433,7 @@ int huffman_decode(huffman_decoder_t* decoder,
 - **After**: CLZ, CSEL, REV, prefetch instructions
 - **Impact**: Single-cycle operations vs multi-cycle software equivalents
 
-### 📊 **Optimization Effectiveness by Data Type**
+### **Optimization Effectiveness by Data Type**
 
 ```
 Data Pattern       Iteration 1    Iteration 2    Improvement    Reason
@@ -456,7 +446,7 @@ Large Files        70.2 MB/s     79.0 MB/s      +12.5%        Cache prefetch
 Small Files        185.0 MB/s    162.0 MB/s     -12.4%        Optimization overhead
 ```
 
-### 🎯 **Key Success Factors**
+### **Key Success Factors**
 
 1. **Hardware-Software Co-design**: Leveraging ARM64-specific instructions
 2. **Algorithmic Improvements**: O(n) → O(1) transformations where possible
@@ -464,14 +454,3 @@ Small Files        185.0 MB/s    162.0 MB/s     -12.4%        Optimization overh
 4. **Branch Optimization**: CSEL patterns and prediction hints
 5. **Adaptive Strategies**: Multiple code paths for different data patterns
 
-### 🔄 **Iteration 3 Readiness**
-
-The code evolution demonstrates successful ARM64 instruction-level optimization with clear opportunities for the next phase:
-
-- **NEON SIMD**: Multi-stream parallel processing (expected +100-200%)
-- **Lookup Tables**: Algorithm-level improvements beyond instruction optimization
-- **Cache Architecture**: Advanced prefetch and alignment strategies
-
----
-
-*This code evolution analysis demonstrates how systematic ARM64 optimization transformed simple, portable C code into hardware-optimized implementations while maintaining functional correctness and cross-platform compatibility. The documented +12.5% performance improvement validates the effectiveness of instruction-level optimization techniques.*
